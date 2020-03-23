@@ -72,6 +72,12 @@ enum Test3 {
     FOUR = 4; /// Other value with a comment.
 }
 
+enum Test4 {
+    // Value with a comment on top.
+    THREE = 3;  // Value with a double-slash comment.
+    FOUR = 4; // Other value with a comment.
+}
+
 service ServiceTest {
     // My method does things
     rpc SingleLineMethod (MyRequest) returns (MyResponse);

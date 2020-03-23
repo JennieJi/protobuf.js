@@ -103,6 +103,7 @@ function tokenize(source, alternateCommentMode) {
     var offset = 0,
         length = source.length,
         line = 1,
+        isTrailing = false,
         commentType = null,
         commentText = null,
         commentLine = 0,
@@ -251,6 +252,7 @@ function tokenize(source, alternateCommentMode) {
                         ++offset;
                         if (isDoc) {
                             setComment(start, offset - 1);
+                            setIsTrailing(start - 3);
                         }
                         ++line;
                         repeat = true;
@@ -272,6 +274,7 @@ function tokenize(source, alternateCommentMode) {
                         }
                         if (isDoc) {
                             setComment(start, offset);
+                            setIsTrailing(start - 2);
                         }
                         line++;
                         repeat = true;
@@ -293,6 +296,7 @@ function tokenize(source, alternateCommentMode) {
                     ++offset;
                     if (isDoc) {
                         setComment(start, offset - 2);
+                        setIsTrailing(start - 3);
                     }
                     repeat = true;
                 } else {
@@ -313,6 +317,17 @@ function tokenize(source, alternateCommentMode) {
         if (token === "\"" || token === "'")
             stringDelim = token;
         return token;
+    }
+
+    function setIsTrailing(start) {
+        var traceOffset = start - 2;
+        var char;
+        isTrailing = false;
+        while (--traceOffset >= 0 && !isTrailing) {
+            char = charAt(traceOffset);
+            if (/[\r\n]/.test(char)) break;
+            isTrailing = /\S/.test(char);
+        }
     }
 
     /**
@@ -369,7 +384,7 @@ function tokenize(source, alternateCommentMode) {
     function cmnt(trailingLine) {
         var ret = null;
         if (trailingLine === undefined) {
-            if (commentLine === line - 1 && (alternateCommentMode || commentType === "*" || commentLineEmpty)) {
+            if (commentLine === line - 1 && (alternateCommentMode && !isTrailing || commentType === "*" || commentLineEmpty)) {
                 ret = commentText;
             }
         } else {
